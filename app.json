@@ -8,7 +8,6 @@
     "scheme": "nativewind-expo-router",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/app/nepal-logo.png",
       "resizeMode": "center",
       "backgroundColor": "#ffffff"
     },

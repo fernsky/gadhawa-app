@@ -7,6 +7,7 @@ import {
 } from "@/lib/types/auth";
 import { apiClient } from "./client";
 import { AuthError } from "@/lib/types/errors";
+import axios from "axios";
 
 export const signupSchema = z
   .object({
@@ -29,7 +30,13 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 
+export const signinSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
+export type SigninInput = z.infer<typeof signinSchema>;
 
 export { AuthError }; // Re-export for convenience
 
@@ -41,7 +48,7 @@ export async function signup(data: SignupInput): Promise<AuthResponse> {
       name: data.name,
     });
 
-    return authResponseSchema.parse(response);
+    return authResponseSchema.parse(response.data);
   } catch (error) {
     if (error instanceof AuthError) {
       throw error;
@@ -53,12 +60,28 @@ export async function signup(data: SignupInput): Promise<AuthResponse> {
   }
 }
 
-export async function signin(data: {
-  email: string;
-  password: string;
-}): Promise<AuthResponse> {
-  const response = await apiClient.post<AuthResponse>("/auth/signin", data);
-  return authResponseSchema.parse(response);
+export async function signin(data: SigninInput): Promise<AuthResponse> {
+  try {
+    const response = await apiClient.post<AuthResponse>("/auth/login", data);
+    return authResponseSchema.parse(response.data);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      throw error;
+    }
+    if (error instanceof z.ZodError) {
+      throw new AuthError(500, "Invalid response from server");
+    }
+    if (axios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        throw new AuthError(401, "Invalid email or password");
+      }
+      throw new AuthError(
+        error.response?.status || 500,
+        error.response?.data?.message || "Something went wrong"
+      );
+    }
+    throw new AuthError(500, "Something went wrong");
+  }
 }
 
 export async function signout(): Promise<void> {

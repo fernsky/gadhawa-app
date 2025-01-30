@@ -21,6 +21,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { View } from "react-native";
+import { toastVariants } from "@/components/ui/toasts/variants";
 
 // Initialize QueryClient outside of component
 const queryClient = new QueryClient({
@@ -85,7 +86,12 @@ export default function RootLayout() {
             </AuthGuard>
           </AuthProvider>
         </AppProvider>
-        <Toast />
+        <Toast
+          config={toastVariants}
+          position="top"
+          topOffset={70}
+          visibilityTime={3000}
+        />
       </QueryClientProvider>
     </View>
   );

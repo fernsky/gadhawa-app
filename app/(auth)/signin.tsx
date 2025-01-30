@@ -1,70 +1,68 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   TextInput,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from "react-native";
 import { Text } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { useAuth } from "@/providers/AuthProvider";
 import { LinearGradient } from "expo-linear-gradient";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
-  DevicePhoneMobileIcon,
+  EnvelopeIcon,
   KeyIcon,
   ArrowRightIcon,
   SparklesIcon,
-  ChartBarIcon,
-  TableCellsIcon,
-  DocumentCheckIcon,
 } from "react-native-heroicons/outline";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useSignin } from "@/lib/hooks/useAuth";
+import { toast } from "@/lib/toast";
+import { signinSchema, type SigninInput, type AuthError } from "@/lib/api/auth";
 
 export default function SignIn() {
-  const [mobile, setMobile] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
   const insets = useSafeAreaInsets();
 
-  const handleSignIn = async () => {
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SigninInput>({
+    resolver: zodResolver(signinSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const { mutate: signin, isPending } = useSignin({
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      toast.success("Welcome back!", "Successfully logged in");
+      router.push("/(app)");
+    },
+    onError: (error: AuthError) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      if (error.code === 401) {
+        toast.error("Login failed", "Invalid email or password");
+      } else {
+        toast.error(
+          "Login failed",
+          error.message || "Something went wrong, please try again"
+        );
+      }
+    },
+  });
+
+  const onSubmit = (data: SigninInput) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (!mobile || !password) {
-      Alert.alert("Error", "Please fill all fields");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // const response = await fetch(`${API_URL}oauth/token`, {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({
-      //     grant_type: "password",
-      //     client_id: CLIENT_ID,
-      //     client_secret: CLIENT_SECRET,
-      //     username: mobile,
-      //     password,
-      //   }),
-      // });
-
-      // const data = await response.json();
-      // if (!response.ok) throw new Error(data.message);
-
-      // await login(data.access_token);
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+    signin(data);
   };
 
   return (
@@ -125,50 +123,94 @@ export default function SignIn() {
 
         <View className="space-y-6 grid gap-2 w-full max-w-sm self-center">
           <View className="space-y-2">
-            <Text
-              style={{ fontFamily: "Inter_500Medium" }}
-              className="text-sm ml-1 text-slate-600"
-            >
-              Mobile Number
-            </Text>
-            <View className="flex-row items-center bg-slate-50/80 rounded-xl p-4 border border-slate-200">
-              <DevicePhoneMobileIcon size={20} color="#475569" />
-              <TextInput
-                style={{ fontFamily: "Inter_400Regular" }}
-                className="flex-1 ml-3 text-base text-slate-900"
-                placeholder="Enter your mobile number"
-                placeholderTextColor="#94a3b8"
-                keyboardType="phone-pad"
-                value={mobile}
-                onChangeText={setMobile}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, value } }) => (
+                <View className="space-y-2">
+                  <View
+                    className={`flex-row items-center bg-slate-50/80 rounded-xl p-4 border ${
+                      errors.email ? "border-red-300" : "border-slate-200"
+                    }`}
+                  >
+                    <EnvelopeIcon size={20} color="#475569" />
+                    <TextInput
+                      style={{
+                        fontFamily: "Inter_400Regular",
+                        color: errors.email ? "#EF4444" : "#1F2937",
+                      }}
+                      className="flex-1 ml-3 text-base"
+                      placeholder="Enter your email"
+                      placeholderTextColor={
+                        errors.email ? "#FCA5A5" : "#94A3B8"
+                      }
+                      value={value}
+                      onChangeText={onChange}
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      editable={!isPending}
+                    />
+                  </View>
+                  {errors.email && (
+                    <Text
+                      style={{ fontFamily: "Inter_500Medium" }}
+                      className="text-red-500 text-xs ml-1"
+                    >
+                      {errors.email.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
           </View>
 
           <View className="space-y-2">
-            <Text
-              style={{ fontFamily: "Inter_500Medium" }}
-              className="text-sm ml-1 text-slate-600"
-            >
-              Password
-            </Text>
-            <View className="flex-row items-center bg-slate-50/80 rounded-xl p-4 border border-slate-200">
-              <KeyIcon size={20} color="#475569" />
-              <TextInput
-                style={{ fontFamily: "Inter_400Regular" }}
-                className="flex-1 ml-3 text-base text-slate-900"
-                placeholder="Enter your password"
-                placeholderTextColor="#94a3b8"
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, value } }) => (
+                <View className="space-y-2">
+                  <View
+                    className={`flex-row items-center bg-slate-50/80 rounded-xl p-4 border ${
+                      errors.password ? "border-red-300" : "border-slate-200"
+                    }`}
+                  >
+                    <KeyIcon size={20} color="#475569" />
+                    <TextInput
+                      style={{
+                        fontFamily: "Inter_400Regular",
+                        color: errors.password ? "#EF4444" : "#1F2937",
+                      }}
+                      className="flex-1 ml-3 text-base"
+                      placeholder="Enter your password"
+                      placeholderTextColor={
+                        errors.password ? "#FCA5A5" : "#94A3B8"
+                      }
+                      secureTextEntry
+                      value={value}
+                      onChangeText={onChange}
+                      editable={!isPending}
+                    />
+                  </View>
+                  {errors.password && (
+                    <Text
+                      style={{ fontFamily: "Inter_500Medium" }}
+                      className="text-red-500 text-xs ml-1"
+                    >
+                      {errors.password.message}
+                    </Text>
+                  )}
+                </View>
+              )}
+            />
           </View>
 
           <TouchableOpacity
-            onPress={handleSignIn}
-            className="bg-blue-600 rounded-xl p-4 mt-2"
+            onPress={handleSubmit(onSubmit)}
+            disabled={isPending}
+            className={`rounded-xl p-4 mt-4 ${
+              isPending ? "bg-blue-400" : "bg-blue-600"
+            }`}
             style={{
               shadowColor: "#1e40af",
               shadowOffset: { width: 0, height: 4 },
@@ -177,7 +219,7 @@ export default function SignIn() {
               elevation: 4,
             }}
           >
-            {loading ? (
+            {isPending ? (
               <ActivityIndicator color="white" />
             ) : (
               <View className="flex-row items-center justify-center">
@@ -185,7 +227,7 @@ export default function SignIn() {
                   style={{ fontFamily: "Inter_600SemiBold", color: "white" }}
                   className="text-white text-base mr-2"
                 >
-                  Access Dashboard
+                  Sign In
                 </Text>
                 <ArrowRightIcon size={18} color="white" />
               </View>

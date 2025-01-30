@@ -7,7 +7,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native";
 import { Text } from "react-native-paper";
 import { useRouter } from "expo-router";
@@ -20,7 +19,6 @@ import {
   KeyIcon,
   ArrowRightIcon,
   SparklesIcon,
-  CheckCircleIcon,
 } from "react-native-heroicons/outline";
 import { useForm, Controller, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,17 +47,23 @@ export default function SignUp() {
     },
   });
 
-  const signupMutation = useSignup({
+  const { mutate: signup, isPending } = useSignup({
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      toast.success("Account created successfully!");
+      toast.success(
+        "Welcome aboard!",
+        "Your account has been created successfully"
+      );
       router.push("/(app)");
     },
     onError: (error: AuthError) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 
       if (error.code === 409) {
-        toast.error("An account with this email already exists");
+        toast.error(
+          "Account exists",
+          "An account with this email already exists"
+        );
       } else if (error.code === 400 && error.errors) {
         Object.entries(error.errors).forEach(([field, messages]) => {
           if (field in control._fields) {
@@ -69,15 +73,19 @@ export default function SignUp() {
             });
           }
         });
+        toast.error("Validation Error", "Please check your input");
       } else {
-        toast.error(error.message || "Something went wrong");
+        toast.error(
+          "Oops!",
+          error.message || "Something went wrong, please try again"
+        );
       }
     },
   });
 
   const onSubmit = (data: SignupInput) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    signupMutation.mutate(data);
+    signup(data);
   };
 
   return (
@@ -121,20 +129,7 @@ export default function SignUp() {
           </Text>
         </View>
 
-        <View className="space-y-4 w-full max-w-sm self-center">
-          {signupMutation.error && (
-            <View className="bg-red-50 p-3 rounded-lg border border-red-200">
-              <Text
-                style={{ fontFamily: "Inter_500Medium" }}
-                className="text-red-600 text-sm"
-              >
-                {signupMutation.error instanceof AuthError
-                  ? signupMutation.error.message
-                  : "Something went wrong"}
-              </Text>
-            </View>
-          )}
-
+        <View className="space-y-4 grid gap-2 w-full max-w-sm self-center">
           {/* Form fields */}
           <FormField
             control={control}
@@ -142,7 +137,7 @@ export default function SignUp() {
             placeholder="Full Name"
             icon={<UserIcon size={20} color="#475569" />}
             error={errors.name?.message}
-            editable={!signupMutation.isPending}
+            editable={!isPending}
           />
 
           <FormField
@@ -153,7 +148,7 @@ export default function SignUp() {
             error={errors.email?.message}
             keyboardType="email-address"
             autoCapitalize="none"
-            editable={!signupMutation.isPending}
+            editable={!isPending}
           />
 
           <FormField
@@ -163,7 +158,7 @@ export default function SignUp() {
             icon={<KeyIcon size={20} color="#475569" />}
             error={errors.password?.message}
             secureTextEntry
-            editable={!signupMutation.isPending}
+            editable={!isPending}
           />
 
           <FormField
@@ -173,7 +168,7 @@ export default function SignUp() {
             icon={<KeyIcon size={20} color="#475569" />}
             error={errors.confirmPassword?.message}
             secureTextEntry
-            editable={!signupMutation.isPending}
+            editable={!isPending}
           />
 
           <Controller
@@ -239,9 +234,9 @@ export default function SignUp() {
 
           <TouchableOpacity
             onPress={handleSubmit(onSubmit)}
-            disabled={signupMutation.isPending}
+            disabled={isPending}
             className={`rounded-xl p-4 mt-6 ${
-              signupMutation.isPending ? "bg-blue-400" : "bg-blue-600"
+              isPending ? "bg-blue-400" : "bg-blue-600"
             }`}
             style={{
               shadowColor: "#1e40af",
@@ -251,12 +246,12 @@ export default function SignUp() {
               elevation: 4,
             }}
           >
-            {signupMutation.isPending ? (
+            {isPending ? (
               <ActivityIndicator color="white" />
             ) : (
               <View className="flex-row items-center justify-center">
                 <Text
-                  style={{ fontFamily: "Inter_600SemiBold" }}
+                  style={{ fontFamily: "Inter_600SemiBold", color: "white" }}
                   className="text-white text-base mr-2"
                 >
                   Create Account
@@ -314,18 +309,36 @@ function FormField({
       control={control}
       name={name}
       render={({ field: { onChange, value } }) => (
-        <View className="space-y-1">
-          <View className="flex-row items-center bg-slate-50/80 rounded-xl p-4 border border-slate-200">
+        <View className="space-y-2 mb-2 grid gap-2">
+          {/* Added more vertical spacing */}
+          <View
+            className={`flex-row items-center bg-slate-50/80 rounded-xl p-4 border ${
+              error ? "border-red-300" : "border-slate-200"
+            }`}
+          >
             {icon}
             <TextInput
-              style={{ fontFamily: "Inter_400Regular" }}
-              className="flex-1 ml-3 text-base text-slate-900"
+              style={{
+                fontFamily: "Inter_400Regular",
+                color: error ? "#EF4444" : "#1F2937", // Red text for error state
+              }}
+              className="flex-1 ml-3 text-base"
               value={value}
               onChangeText={onChange}
+              placeholderTextColor={error ? "#FCA5A5" : "#94A3B8"} // Red tinted placeholder for error
               {...props}
             />
           </View>
-          {error && <Text className="text-red-500 text-xs ml-1">{error}</Text>}
+          {error && (
+            <View className="flex-row items-center px-1">
+              <Text
+                style={{ fontFamily: "Inter_500Medium", color: "#EF4444" }} // Red text for error
+                className="text-red-500 text-xs"
+              >
+                {error}
+              </Text>
+            </View>
+          )}
         </View>
       )}
     />

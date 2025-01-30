@@ -1,6 +1,6 @@
 import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
 import { signup, signin, signout } from "@/lib/api/auth";
-import type { SignupInput, AuthError } from "@/lib/api/auth";
+import type { SignupInput, AuthError, SigninInput } from "@/lib/api/auth";
 import type { AuthResponse } from "@/lib/types/auth";
 import * as SecureStore from "expo-secure-store";
 import { queryClient } from "@/lib/query/client";
@@ -24,12 +24,21 @@ export function useSignup(
   });
 }
 
-export function useSignin() {
+export function useSignin(
+  options?: Omit<
+    UseMutationOptions<AuthResponse, AuthError, SigninInput>,
+    "mutationFn"
+  >
+) {
   return useMutation({
     mutationFn: signin,
-    onSuccess: async (data) => {
+    onSuccess: async (data, variables, context) => {
       await SecureStore.setItemAsync("token", data.access_token);
-      // Store user data or handle auth state
+      queryClient.setQueryData(["user"], data.user);
+      options?.onSuccess?.(data, variables, context);
+    },
+    onError: (error: AuthError, variables, context) => {
+      options?.onError?.(error, variables, context);
     },
   });
 }
