@@ -54,7 +54,7 @@ export default function SignUp() {
         "Welcome aboard!",
         "Your account has been created successfully"
       );
-      router.push("/(app)");
+      router.replace("/(app)"); // Updated path
     },
     onError: (error: AuthError) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

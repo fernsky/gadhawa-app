@@ -11,9 +11,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     const inAuthGroup = segments[0] === "(auth)";
 
     if (!isAuthenticated && !inAuthGroup) {
-      router.replace("/(auth)/signin");
+      router.replace("/(app)/home");
     } else if (isAuthenticated && inAuthGroup) {
-      router.replace("/(app)/(tabs)");
+      router.replace("/(app)/index");
     }
   }, [isAuthenticated, segments]);
 

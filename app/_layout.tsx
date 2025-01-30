@@ -1,3 +1,4 @@
+import "react-native-gesture-handler"; // Add this at the very top
 import "../global.css";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
@@ -70,28 +71,16 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  animation: "fade",
-                  contentStyle: { backgroundColor: "white" },
+                  animation: "none", // Changed to none for smoother transitions
                 }}
               >
-                <Stack.Screen
-                  name="(auth)"
-                  options={{ animation: "slide_from_bottom" }}
-                />
-                <Stack.Screen
-                  name="(app)"
-                  options={{ animation: "slide_from_right" }}
-                />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(app)" />
               </Stack>
             </AuthGuard>
           </AuthProvider>
         </AppProvider>
-        <Toast
-          config={toastVariants}
-          position="top"
-          topOffset={70}
-          visibilityTime={3000}
-        />
+        <Toast config={toastVariants} position="top" topOffset={70} />
       </QueryClientProvider>
     </View>
   );
