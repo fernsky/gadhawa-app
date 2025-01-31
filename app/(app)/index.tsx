@@ -84,7 +84,7 @@ export default function HomePage() {
         }
       >
         {/* Profile Section */}
-        <View className="items-center mb-8">
+        <View className="items-center grid gap-1 mb-8">
           <View className="w-20 h-20 rounded-full bg-blue-50 items-center justify-center mb-4">
             <Text
               style={{ fontFamily: "Inter_600SemiBold" }}
@@ -109,7 +109,7 @@ export default function HomePage() {
         </View>
 
         {/* Profile Cards */}
-        <View className="space-y-4">
+        <View className="space-y-4 grid gap-2">
           <Text
             style={{ fontFamily: "Inter_600SemiBold" }}
             className="text-sm text-slate-400 uppercase tracking-wider mb-2 px-1"

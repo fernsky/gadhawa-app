@@ -10,7 +10,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const inAuthGroup = segments[0] === "(auth)";
     const inAppGroup = segments[0] === "(app)";
-    console.log(isAuthenticated, inAuthGroup, inAppGroup);
     if (!isAuthenticated && inAppGroup) {
       // Redirect to signin if trying to access app routes while not authenticated
       router.replace("/(auth)/signin");

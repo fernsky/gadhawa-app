@@ -1,198 +1,168 @@
-import { View, StyleSheet } from "react-native";
+import "../global.css";
+import { View } from "react-native";
 import {
   DrawerContentScrollView,
   DrawerContentComponentProps,
 } from "@react-navigation/drawer";
-import { Text, Avatar, Divider } from "react-native-paper";
-import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import colors from "@/constants/Colors";
+import { Text } from "react-native-paper";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import useAuthStore from "@/store/auth";
 import { useLogout } from "@/lib/hooks/useAuth";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SparklesIcon,
+  HomeIcon,
+  UserCircleIcon,
+  ClipboardDocumentListIcon,
+  Cog6ToothIcon,
+  ArrowLeftOnRectangleIcon,
+} from "react-native-heroicons/outline";
 
 interface MenuItemProps {
   icon: JSX.Element;
   label: string;
   onPress?: () => void;
+  isFocused?: boolean;
   isLogout?: boolean;
   disabled?: boolean;
 }
 
-const MenuItem = ({ icon, label, onPress, isLogout }: MenuItemProps) => (
+const MenuItem = ({
+  icon,
+  label,
+  onPress,
+  isFocused,
+  isLogout,
+  disabled,
+}: MenuItemProps) => (
   <TouchableOpacity
-    style={[styles.menuItem, isLogout && styles.logoutButton]}
     onPress={onPress}
+    disabled={disabled}
+    className={`flex-row items-center px-4 py-3.5 mb-1 rounded-xl
+      ${isFocused ? "bg-blue-50" : "bg-transparent"}
+      ${isLogout ? "mt-4 bg-red-50" : ""}
+      ${disabled ? "opacity-50" : ""}`}
   >
     {icon}
     <Text
-      variant="bodyLarge"
-      style={[styles.menuText, isLogout && styles.logoutText]}
+      className={`ml-3 ${
+        isLogout
+          ? "text-red-600"
+          : isFocused
+          ? "text-blue-600"
+          : "text-slate-600"
+      }`}
+      style={{
+        fontFamily: isFocused ? "Inter_600SemiBold" : "Inter_500Medium",
+      }}
     >
       {label}
     </Text>
   </TouchableOpacity>
 );
 
-export default function CustomDrawer(props: DrawerContentComponentProps) {
+export function CustomDrawer(props: DrawerContentComponentProps) {
   const { user } = useAuthStore();
   const { mutate: logout, isPending } = useLogout();
+  const insets = useSafeAreaInsets();
 
-  const handleSignOut = async () => {
-    try {
-      await logout();
-      router.replace("/(auth)/signin");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
-  };
+  const userInitials =
+    user?.name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase() || "?";
 
   const menuItems = [
-    {
-      icon: (
-        <MaterialCommunityIcons
-          name="home-outline"
-          size={24}
-          color={colors.primary}
-        />
-      ),
-      label: "Home",
-      onPress: () => router.push("/(app)"),
-    },
-    {
-      icon: (
-        <MaterialCommunityIcons
-          name="account-outline"
-          size={24}
-          color={colors.primary}
-        />
-      ),
-      label: "Profile",
-      onPress: () => router.push("/(app)/profile"),
-    },
-    {
-      icon: (
-        <Ionicons
-          name="notifications-outline"
-          size={24}
-          color={colors.primary}
-        />
-      ),
-      label: "Notifications",
-      onPress: () => router.push("/(app)/notifications"),
-    },
-    {
-      icon: (
-        <MaterialCommunityIcons
-          name="cog-outline"
-          size={24}
-          color={colors.primary}
-        />
-      ),
-      label: "Settings",
-      onPress: () => router.push("/(app)/settings"),
-    },
+    { name: "index", label: "Home", icon: HomeIcon },
+    { name: "profile", label: "My Profile", icon: UserCircleIcon },
+    { name: "surveys", label: "My Surveys", icon: ClipboardDocumentListIcon },
+    { name: "settings", label: "Settings", icon: Cog6ToothIcon },
   ];
 
   return (
-    <DrawerContentScrollView {...props} style={styles.container}>
-      <View style={styles.profileSection}>
-        <Avatar.Image
-          size={80}
-          source={require("@/assets/images/default-avatar.png")}
-        />
-        <View style={styles.profileInfo}>
-          <Text variant="titleLarge" style={styles.name}>
-            {user?.name || "Guest"}
-          </Text>
-          <Text variant="bodyMedium" style={styles.email}>
-            {user?.email || "Not signed in"}
-          </Text>
+    <DrawerContentScrollView {...props} className="flex-1">
+      <LinearGradient
+        colors={["#EFF6FF", "#ffffff"]}
+        className="absolute inset-0"
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      />
+
+      <View style={{ paddingTop: insets.top }}>
+        {/* Header */}
+        <View className="px-6 py-8 border-b border-slate-100">
+          <View className="flex-row items-center bg-blue-50 self-start px-4 py-2 rounded-full mb-6">
+            <SparklesIcon size={16} color="#3b82f6" />
+            <Text
+              className="text-blue-600 ml-2 text-sm"
+              style={{ fontFamily: "Inter_600SemiBold" }}
+            >
+              Survey Management
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <View className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 items-center justify-center">
+              <Text
+                className="text-lg text-white"
+                style={{ fontFamily: "Inter_600SemiBold" }}
+              >
+                {userInitials}
+              </Text>
+            </View>
+            <View className="ml-3">
+              <Text
+                className="text-lg text-slate-900"
+                style={{ fontFamily: "Inter_700Bold" }}
+              >
+                {user?.name || "Guest User"}
+              </Text>
+              <Text
+                className="text-sm text-slate-500"
+                style={{ fontFamily: "Inter_400Regular" }}
+              >
+                {user?.email || "Not signed in"}
+              </Text>
+            </View>
+          </View>
         </View>
-      </View>
 
-      <Divider style={styles.divider} />
-
-      <View style={styles.menuContainer}>
-        {menuItems.map((item, index) => (
-          <MenuItem key={index} {...item} />
-        ))}
-
-        <Divider style={styles.divider} />
-
-        <MenuItem
-          icon={
-            <MaterialCommunityIcons
-              name="help-circle-outline"
-              size={24}
-              color={colors.primary}
+        {/* Menu */}
+        <View className="flex-1 px-2 py-4">
+          {menuItems.map((item) => (
+            <MenuItem
+              key={item.name}
+              icon={
+                <item.icon
+                  size={20}
+                  color={
+                    props.state.routeNames[props.state.index] === item.name
+                      ? "#3b82f6"
+                      : "#64748b"
+                  }
+                />
+              }
+              label={item.label}
+              isFocused={
+                props.state.routeNames[props.state.index] === item.name
+              }
+              onPress={() => props.navigation.navigate(item.name)}
             />
-          }
-          label="Help & Support"
-          onPress={() => router.push("/(app)/help")}
-        />
+          ))}
 
-        <MenuItem
-          icon={
-            <MaterialCommunityIcons name="logout" size={24} color="#FF4444" />
-          }
-          label={isPending ? "Logging out..." : "Logout"}
-          onPress={handleSignOut}
-          isLogout
-          disabled={isPending}
-        />
+          {/* Logout Button */}
+          <MenuItem
+            icon={<ArrowLeftOnRectangleIcon size={20} color="#EF4444" />}
+            label={isPending ? "Signing out..." : "Sign out"}
+            onPress={() => logout()}
+            isLogout
+            disabled={isPending}
+          />
+        </View>
       </View>
     </DrawerContentScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  profileSection: {
-    padding: 20,
-    alignItems: "center",
-    marginTop: 20,
-  },
-  profileInfo: {
-    alignItems: "center",
-    marginTop: 15,
-  },
-  name: {
-    fontWeight: "bold",
-    color: colors.primary,
-  },
-  email: {
-    color: "#666",
-    marginTop: 5,
-  },
-  divider: {
-    marginVertical: 15,
-    backgroundColor: "#eee",
-    height: 1,
-  },
-  menuContainer: {
-    paddingHorizontal: 10,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginBottom: 5,
-  },
-  menuText: {
-    marginLeft: 15,
-    color: "#333",
-  },
-  logoutButton: {
-    marginTop: 20,
-    backgroundColor: "#FFF1F1",
-  },
-  logoutText: {
-    color: "#FF4444",
-  },
-});
