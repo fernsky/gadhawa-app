@@ -24,10 +24,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignin } from "@/lib/hooks/useAuth";
 import { toast } from "@/lib/toast";
 import { signinSchema, type SigninInput, type AuthError } from "@/lib/api/auth";
+import { useFormStore } from "@/store/form/store";
+import SyncManager from "@/lib/sync/syncManager";
 
 export default function SignIn() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { db } = useFormStore();
 
   const {
     control,
@@ -42,10 +45,14 @@ export default function SignIn() {
   });
 
   const { mutate: signin, isPending } = useSignin({
-    onSuccess: () => {
+    onSuccess: async () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       toast.success("Welcome back!", "Successfully logged in");
       router.replace("/(app)"); // This will now go to index.tsx in (app)
+      if (db) {
+        const syncManager = new SyncManager(db);
+        await syncManager.syncAll();
+      }
     },
     onError: (error: AuthError) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
