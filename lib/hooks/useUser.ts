@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getUserProfile } from "@/lib/api/user";
+import { getUserProfile } from "@/api/user";
 import * as SecureStore from "expo-secure-store";
 import { queryClient } from "@/lib/query/client";
 import { toast } from "@/lib/toast";

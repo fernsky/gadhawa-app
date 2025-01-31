@@ -23,7 +23,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignin } from "@/lib/hooks/useAuth";
 import { toast } from "@/lib/toast";
-import { signinSchema, type SigninInput, type AuthError } from "@/lib/api/auth";
+import { signinSchema, type SigninInput, type AuthError } from "@/api/auth";
 import { useFormStore } from "@/store/form/store";
 import SyncManager from "@/lib/sync/syncManager";
 

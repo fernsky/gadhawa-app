@@ -9,7 +9,7 @@ import { apiClient } from "./client";
 import { AuthError } from "@/lib/types/errors";
 import axios from "axios";
 import * as SecureStore from "expo-secure-store";
-import { queryClient } from "../query/client";
+import { queryClient } from "../lib/query/client";
 import useAuthStore from "@/store/auth";
 
 export const signupSchema = z

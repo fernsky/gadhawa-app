@@ -24,7 +24,7 @@ import { useForm, Controller, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSignup } from "@/lib/hooks/useAuth";
 import { toast } from "@/lib/toast";
-import { signupSchema, type SignupInput, AuthError } from "@/lib/api/auth";
+import { signupSchema, type SignupInput, AuthError } from "@/api/auth";
 import Checkbox from "expo-checkbox";
 
 export default function SignUp() {

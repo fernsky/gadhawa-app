@@ -1,5 +1,5 @@
 import { apiClient } from "./client";
-import { userProfileSchema, type UserProfile } from "../types/user";
+import { userProfileSchema, type UserProfile } from "../lib/types/user";
 import { AuthError } from "@/lib/types/errors";
 
 export async function getUserProfile(): Promise<UserProfile> {

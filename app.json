@@ -31,13 +31,15 @@
     },
     "plugins": [
       "expo-router",
+      ["@morrowdigital/watermelondb-expo-plugin"],
       [
         "expo-screen-orientation",
         {
           "initialOrientation": "DEFAULT"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-build-properties"
     ],
     "experiments": {
       "tsconfigPaths": true,

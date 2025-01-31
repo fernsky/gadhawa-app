@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
-import { signup, signin, signout } from "@/lib/api/auth";
-import type { SignupInput, AuthError, SigninInput } from "@/lib/api/auth";
+import { signup, signin, signout } from "@/api/auth";
+import type { SignupInput, AuthError, SigninInput } from "@/api/auth";
 import useAuthStore from "@/store/auth";
 import { useRouter } from "expo-router";
-import { logout } from "@/lib/api/auth";
+import { logout } from "@/api/auth";
 import * as Haptics from "expo-haptics";
 import { toast } from "@/lib/toast";
 

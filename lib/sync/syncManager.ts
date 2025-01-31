@@ -1,6 +1,6 @@
 import { Database, Q } from "@nozbe/watermelondb";
 import { SurveyResponse } from "@/types/models";
-import { syncFormWithBackend } from "../api/sync";
+import { syncFormWithBackend } from "../../api/sync";
 import { SurveyResponseModel } from "@/store/form/store";
 
 export class SyncManager {
