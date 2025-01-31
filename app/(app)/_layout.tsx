@@ -1,6 +1,6 @@
 import { Drawer } from "expo-router/drawer";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { CustomDrawer } from "@/components/CustomDrawer";
+import CustomDrawer from "@/components/CustomDrawer";
 
 export default function AppLayout() {
   return (

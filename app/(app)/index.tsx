@@ -19,7 +19,7 @@ import {
 import { format } from "date-fns";
 
 const ProfileCard = ({ label, value, icon }: any) => (
-  <View className="flex-row items-center space-x-4 bg-white/80 p-4 rounded-xl border border-slate-100">
+  <View className="flex-row  gap-4 items-center space-x-4 bg-white/80 p-4 rounded-xl border border-slate-100">
     <View className="w-10 h-10 rounded-full bg-blue-50 items-center justify-center">
       {icon}
     </View>
