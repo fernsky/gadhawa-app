@@ -3,6 +3,17 @@ import { appSchema, tableSchema } from "@nozbe/watermelondb";
 export default appSchema({
   version: 1,
   tables: [
+    // Ward table
+    tableSchema({
+      name: "wards",
+      columns: [
+        { name: "ward_number", type: "number" },
+        { name: "ward_area_code", type: "number" },
+        { name: "geometry", type: "string" }, // JSON string of Geometry
+        { name: "created_at", type: "number" },
+        { name: "updated_at", type: "number" },
+      ],
+    }),
     // Building table
     tableSchema({
       name: "buildings",

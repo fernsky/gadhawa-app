@@ -81,8 +81,8 @@ export default function CustomDrawer(props: DrawerContentComponentProps) {
     },
     {
       icon: <UserCircleIcon size={16} color="#3B82F6" />,
-      label: "Profile",
-      onPress: () => router.push("/(app)/profile"),
+      label: "Survey",
+      onPress: () => router.push("/(app)/survey"),
     },
     {
       icon: <BellIcon size={16} color="#3B82F6" />,
