@@ -1,7 +1,7 @@
 import "react-native-gesture-handler"; // Add this at the very top
 import "../global.css";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Stack } from "expo-router";
 import { AuthProvider } from "@/providers/AuthProvider";
 import { AppProvider } from "@/providers/AppProvider";
@@ -40,6 +40,7 @@ const queryClient = new QueryClient({
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [isReady, setIsReady] = useState(false);
   const [fontsLoaded, fontError] = useFonts({
     Inter_100Thin,
     Inter_200ExtraLight,
@@ -52,13 +53,23 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      // Hide splash screen once fonts are loaded or if there's an error
-      SplashScreen.hideAsync();
+    async function prepare() {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+        // Wait for fonts and any other resources
+        if (fontsLoaded || fontError) {
+          await SplashScreen.hideAsync();
+          setIsReady(true);
+        }
+      } catch (e) {
+        console.warn(e);
+      }
     }
+
+    prepare();
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
+  if (!isReady) {
     return null;
   }
 
@@ -71,7 +82,7 @@ export default function RootLayout() {
               <Stack
                 screenOptions={{
                   headerShown: false,
-                  animation: "none", // Changed to none for smoother transitions
+                  animation: "fade", // Changed to fade for smoother transitions
                 }}
               >
                 <Stack.Screen name="(auth)" />

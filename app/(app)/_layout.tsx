@@ -13,6 +13,7 @@ import {
 } from "react-native-heroicons/outline";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLogout } from "@/lib/hooks/useAuth";
 
 const menuItems = [
   { name: "home", label: "Home", icon: HomeIcon },
@@ -60,6 +61,7 @@ function MenuItem({
 }
 
 function CustomDrawerContent(props: any) {
+  const { mutate: logout, isPending } = useLogout();
   const insets = useSafeAreaInsets();
 
   return (
@@ -135,18 +137,20 @@ function CustomDrawerContent(props: any) {
       >
         <TouchableOpacity
           className="flex-row items-center px-4 py-3 rounded-xl"
-          onPress={() => {
-            // Handle logout
-          }}
+          onPress={() => logout()}
+          disabled={isPending}
         >
           <View className="w-9 h-9 rounded-full bg-red-50 items-center justify-center">
-            <ArrowLeftOnRectangleIcon size={20} color="#EF4444" />
+            <ArrowLeftOnRectangleIcon
+              size={20}
+              color={isPending ? "#FDA4AF" : "#EF4444"}
+            />
           </View>
           <Text
             style={{ fontFamily: "Inter_600SemiBold" }}
-            className="ml-3 text-red-600"
+            className={`ml-3 ${isPending ? "text-red-300" : "text-red-600"}`}
           >
-            Logout
+            {isPending ? "Logging out..." : "Logout"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -183,7 +187,7 @@ export default function AppLayout() {
         }}
       >
         <Drawer.Screen
-          name="home"
+          name="index"
           options={{
             title: "Home",
             headerTitle: "",

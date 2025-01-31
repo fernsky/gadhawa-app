@@ -1,20 +1,22 @@
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet } from "react-native";
 import {
   DrawerContentScrollView,
   DrawerContentComponentProps,
 } from "@react-navigation/drawer";
-import { Text, Avatar, Divider, useTheme } from "react-native-paper";
+import { Text, Avatar, Divider } from "react-native-paper";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import colors from "@/constants/Colors";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { router } from "expo-router";
-import { useAuth } from "@/providers/AuthProvider";
+import useAuthStore from "@/store/auth";
+import { useLogout } from "@/lib/hooks/useAuth";
 
 interface MenuItemProps {
   icon: JSX.Element;
   label: string;
   onPress?: () => void;
   isLogout?: boolean;
+  disabled?: boolean;
 }
 
 const MenuItem = ({ icon, label, onPress, isLogout }: MenuItemProps) => (
@@ -33,12 +35,12 @@ const MenuItem = ({ icon, label, onPress, isLogout }: MenuItemProps) => (
 );
 
 export default function CustomDrawer(props: DrawerContentComponentProps) {
-  //const { signOut } = useAuth();
-  const theme = useTheme();
+  const { user } = useAuthStore();
+  const { mutate: logout, isPending } = useLogout();
 
   const handleSignOut = async () => {
     try {
-      //await signOut();
+      await logout();
       router.replace("/(auth)/signin");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -101,10 +103,10 @@ export default function CustomDrawer(props: DrawerContentComponentProps) {
         />
         <View style={styles.profileInfo}>
           <Text variant="titleLarge" style={styles.name}>
-            John Doe
+            {user?.name || "Guest"}
           </Text>
           <Text variant="bodyMedium" style={styles.email}>
-            john@example.com
+            {user?.email || "Not signed in"}
           </Text>
         </View>
       </View>
@@ -134,9 +136,10 @@ export default function CustomDrawer(props: DrawerContentComponentProps) {
           icon={
             <MaterialCommunityIcons name="logout" size={24} color="#FF4444" />
           }
-          label="Logout"
+          label={isPending ? "Logging out..." : "Logout"}
           onPress={handleSignOut}
           isLogout
+          disabled={isPending}
         />
       </View>
     </DrawerContentScrollView>

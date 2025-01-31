@@ -8,6 +8,9 @@ import {
 import { apiClient } from "./client";
 import { AuthError } from "@/lib/types/errors";
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+import { queryClient } from "../query/client";
+import useAuthStore from "@/store/auth";
 
 export const signupSchema = z
   .object({
@@ -69,6 +72,7 @@ export async function signin(data: SigninInput): Promise<AuthResponse> {
       throw error;
     }
     if (error instanceof z.ZodError) {
+      console.log(error);
       throw new AuthError(500, "Invalid response from server");
     }
     if (axios.isAxiosError(error)) {
@@ -86,4 +90,17 @@ export async function signin(data: SigninInput): Promise<AuthResponse> {
 
 export async function signout(): Promise<void> {
   await apiClient.post("/auth/signout");
+}
+
+export async function logout(): Promise<void> {
+  try {
+    await apiClient.post("/auth/logout");
+  } catch (error) {
+    // Even if the server request fails, we want to clear local state
+    console.warn("Logout request failed:", error);
+  } finally {
+    // Clear token and other auth data
+    await SecureStore.deleteItemAsync("token");
+    queryClient.clear(); // Clear all queries
+  }
 }

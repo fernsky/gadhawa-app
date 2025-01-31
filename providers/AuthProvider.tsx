@@ -1,63 +1,34 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AuthState, AuthContextType } from "@/types/auth";
-
-const initialState: AuthState = {
-  isAuthenticated: false,
-  token: null,
-  user: null,
-};
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import React, { useEffect, useState } from "react";
+import useAuthStore from "@/store/auth";
+import * as SecureStore from "expo-secure-store";
+import { View, ActivityIndicator } from "react-native";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>(initialState);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadAuthState();
+    const initAuth = async () => {
+      try {
+        const token = await SecureStore.getItemAsync("token");
+        if (token) {
+          await useAuthStore.getState().setToken(token);
+        }
+      } catch (error) {
+        console.error("Error initializing auth:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    initAuth();
   }, []);
 
-  const loadAuthState = async () => {
-    try {
-      const token = await AsyncStorage.getItem("auth_token");
-      const userStr = await AsyncStorage.getItem("user");
-
-      if (token && userStr) {
-        const user = JSON.parse(userStr);
-        setState({ isAuthenticated: true, token, user });
-      }
-    } catch (error) {
-      console.error("Error loading auth state:", error);
-    }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        ...state,
-        login: async (token) => {
-          await AsyncStorage.setItem("auth_token", token);
-          setState((prev) => ({ ...prev, isAuthenticated: true, token }));
-        },
-        logout: async () => {
-          await AsyncStorage.multiRemove(["auth_token", "user"]);
-          setState(initialState);
-        },
-        updateUser: async (user) => {
-          await AsyncStorage.setItem("user", JSON.stringify(user));
-          setState((prev) => ({ ...prev, user }));
-        },
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
-  return context;
-};
+
+  return <>{children}</>;
+}

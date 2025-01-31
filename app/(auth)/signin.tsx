@@ -45,7 +45,7 @@ export default function SignIn() {
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       toast.success("Welcome back!", "Successfully logged in");
-      router.replace("/(app)/index"); // This will now go to index.tsx in (app)
+      router.replace("/(app)"); // This will now go to index.tsx in (app)
     },
     onError: (error: AuthError) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
